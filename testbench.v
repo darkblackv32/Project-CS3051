@@ -1,43 +1,32 @@
 module testbench;
-	reg clk;
-	reg reset;
-	wire [31:0] WriteData;
-	wire [31:0] Adr;
-	wire MemWrite;
-	top dut(
-		.clk(clk),
-		.reset(reset),
-		.WriteData(WriteData),
-		.Adr(Adr),
-		.MemWrite(MemWrite)
-	);
-	initial begin
-		reset <= 1;
-		#(22)
-			;
-		reset <= 0;
-	end
-	always begin
-		clk <= 1;
-		#(5)
-			;
-		clk <= 0;
-		#(5)
-			;
-	end
-	always @(negedge clk)
-		if (MemWrite)
-			if ((Adr === 100) & (WriteData === 7)) begin
-				$display("Simulation succeeded");
-				$stop;
-			end
-			else if (Adr !== 96) begin
-				$display("Simulation failed");
-				$stop;
-			end
-			
-	initial begin
-		$dumpfile("sim.vcd");
-		$dumpvars;
-	end
+
+  reg [31:0] a, b;
+  reg [2:0] ALUControl;
+  wire [31:0] Result;
+  wire [3:0] ALUFlags;
+	
+//Solo instancie el alu
+  alu dut (
+    .a(a),
+    .b(b),
+    .ALUControl(ALUControl),
+    .Result(Result),
+    .ALUFlags(ALUFlags)
+  );
+
+  initial begin
+	//LSR Y LSL
+	a = 10;
+	b = 1;
+	ALUControl = 3'b101;
+	#10;
+	$display("a = %d, b = %d, ALUControl = %b, Result = %h, ALUFlags = %b", a, b, ALUControl, Result, ALUFlags);
+	a = 10;
+	b = 1;
+	ALUControl = 3'b100;
+	#10;
+	$display("a = %d, b = %d, ALUControl = %b, Result = %h, ALUFlags = %b", a, b, ALUControl, Result, ALUFlags);
+    
+  end
+
 endmodule
