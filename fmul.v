@@ -1,11 +1,11 @@
-module fmul (A, B, result, temp_mantisa);
+module fmul (A, B, result);
     input [15:0] A;
     input [15:0] B;
     output reg [15:0] result;
 
     reg[4:0] E;
     reg[10:0] m1,m2;
-    output reg[19:0] temp_mantisa;
+    reg[19:0] temp_mantisa;
     reg[9:0] mantisa;
 
     parameter ONE = 15'h3C00;
