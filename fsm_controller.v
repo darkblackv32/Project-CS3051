@@ -1,24 +1,25 @@
-module fsm_controller(clk,next,dat,result);
-    input clk,next, [15:0]dat;
-    output result;  
+module fsm_controller(clk,next,dat,result,flags);
+    input clk,next;
+    input [15:0]dat;
+    output [15:0] result;
+    output [3:0]flags;  
 
     reg [1:0] state, nextstate;
 
     reg[15:0] A,B;
-    reg[3:0] operation;
+    reg[2:0] operation;
     parameter getOperator = 2'b00;
     parameter setA = 2'b01;
-    parameter setB  2'b10;
+    parameter setB = 2'b10;
     parameter calc = 2'b11;
 
     //INSTANCIATE ALU HERE
-    fmul fmul1(A,B,result);
+    alu aluInstance(A,B,operation,result,flags);
 
 
     // state register
-    always @ (posedge clk, posedge reset)
-        if (reset) state <= S0;
-        else state <= nextstate;
+    always @ (posedge clk)
+        state <= nextstate;
 
 
     always @ (*) // next state logic
