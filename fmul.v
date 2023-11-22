@@ -1,64 +1,61 @@
-module fmul (
-    input [7:0] A,
-    input [7:0] B,
-    output reg [7:0] result
-);
+module fmul (A, B, result);
+    input [15:0] A;
+    input [15:0] B;
+    output reg [15:0] result;
+    reg[21:0] temp_mantisa;
 
-    // Formato de los operandos en punto flotante de 8 bits
-    parameter SIGN_SIZE = 1;
-    parameter EXPONENT_SIZE = 4; 
-    parameter MANTISSA_SIZE = 3;
+    reg[4:0] E;
+    reg[10:0] m1,m2;
+    reg[9:0] mantisa;
 
-    reg [SIGN_SIZE-1:0] sign_a, sign_b;
-    reg [EXPONENT_SIZE-1:0] exponent_a, exponent_b, exponent_result;
-    reg [MANTISSA_SIZE-1:0] mantissa_a, mantissa_b, mantissa_result;
-    
-    reg [7:0] m1, m2;
-    reg [10:0] temp_mantisa;
-    reg [9:0] mantisa;
+    parameter ONE = 15'h3C00;
+    parameter MAX_ITERATIONS = 22;
+    integer i;
 
-    parameter ONE = 8'h7E; // Ajustado a 8 bits
-
-    always @* begin
-        // Extraer el signo, el exponente y la mantisa de los operandos
-        sign_a = A[7];
-        sign_b = B[7];
-        exponent_a = A[6:3];
-        exponent_b = B[6:3];
-        mantissa_a = A[2:0];
-        mantissa_b = B[2:0];
-
-        // Inicializar el resultado
-        result = 8'h0;
-
-        // Resultado de la multiplicación
-        if (A[7:3] == 3'b0 || B[7:3] == 3'b0) begin
-            result = 8'h0;
-        end else if (A[7:0] == ONE) begin
+    always @(*) begin
+        
+        if(A[14:10] == 0 || B[14:10] == 0)
+            result = 16'd0;
+        else if(A[14:0] == ONE) begin
             result = B;
-            result[7] = A[7] ^ B[7]; //  Set sign
-        end else if (B[7:0] == ONE) begin
+            result[15] = A[15] ^ B[15]; //  Set sign
+        end
+        else if(B[14:0] == ONE) begin
             result = A;
-            result[7] = A[7] ^ B[7]; //  Set sign
-        end else begin
-            // Continuación de la implementación de la multiplicación y normalización
-            exponent_result = exponent_a + exponent_b - 4'b1111;
-            m1 = {1'b1, mantissa_a};
-            m2 = {1'b1, mantissa_b};
+            result[15] = A[15] ^ B[15]; //  Set sign
+        end
+        else  begin
+            E = A[14:10] + B[14:10] - 5'b01111; //Calculate exponent
+            m1 = {1'b1, A[9:0]};
+            m2 = {1'b1, B[9:0]};
+            temp_mantisa = (m1 * m2);
 
-            // Multiplicación
-            temp_mantisa = m1 * m2;
+            $display("E = %b, tempmantisa = %b", E,temp_mantisa);
+            //continue until the first 1 is found
 
-            // Normalización
-            mantissa_result = temp_mantisa[10:2];
-            if (mantissa_result[7] == 1) begin
-                mantissa_result = mantissa_result + 2;
+            if(temp_mantisa[21] == 0) begin
+                // Bucle para normalizar la mantisa
+                for (i = 0; i < MAX_ITERATIONS; i = i + 1) begin
+                    if (temp_mantisa[21] == 0) begin
+                        temp_mantisa = temp_mantisa << 1;
+                    end 
+                end
+                mantisa = temp_mantisa[20:11];
+            end
+            else begin 
+                mantisa = temp_mantisa[20:11];
+                if(temp_mantisa[10] == 1) begin
+                    mantisa = mantisa + 1;
+                    E = E + 1;
+                end
             end
 
-            // Asignamos el resultado final
-            result[7] = sign_a ^ sign_b;
-            result[6:3] = exponent_result;
-            result[2:0] = mantissa_result;
-        end
-    end
+
+            $display("mantisa = %b", mantisa);
+
+            result[15] = A[15] ^ B[15]; //  Set sign
+            result[14:10] = E;
+            result[9:0] = mantisa;
+            end
+   end    
 endmodule
