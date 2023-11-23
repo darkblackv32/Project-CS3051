@@ -7,7 +7,7 @@ Tasks:  <br>
 • Implement and test with Basys 3 board. Up to +6 points in E2. </p>
 
 <p> Annex: <br>
-[FMULL, LSL and LSR in Basys3](https://www.youtube.com/watch?v=CuBdzae33R0) </p>
+[FMULL, LSL and LSR in Basys3](https://www.youtube.com/watch?v=CuBdzae33R0) 
 
 
 
