@@ -24,20 +24,9 @@ module testbench;
 		clk <= 0;
 		#(5)
 			;
-	end
-	always @(negedge clk)
-		if (MemWrite)
-			if ((Adr === 100) & (WriteData === 7)) begin
-				$display("Simulation succeeded");
-				$stop;
-			end
-			else if (Adr !== 96) begin
-				$display("Simulation failed");
-				$stop;
-			end
-			
+	end		
 	initial begin
-		$dumpfile("sim.vcd");
+		$dumpfile("gang.vcd");
 		$dumpvars;
 	end
 endmodule

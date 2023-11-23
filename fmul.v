@@ -2,7 +2,7 @@ module fmul (A, B, result);
     input [15:0] A;
     input [15:0] B;
     output reg [15:0] result;
-    reg[22:0] temp_mantisa;
+    reg[21:0] temp_mantisa;
 
     reg[4:0] E;
     reg[10:0] m1,m2;
@@ -46,8 +46,8 @@ module fmul (A, B, result);
                 mantisa = temp_mantisa[20:11];
                 if(temp_mantisa[10] == 1) begin
                     mantisa = mantisa + 1;
+                    E = E + 1;
                 end
-                E = E + 1;
             end
 
 
