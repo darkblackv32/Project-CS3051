@@ -1,4 +1,4 @@
-ºmodule alu (
+module alu (
     input [31:0] a,
     input [31:0] b,
     input [2:0] ALUControl,
@@ -24,13 +24,13 @@
     // ALU and multiplier functionality
     always @* begin
         casex (ALUControl[2:0])
-            //3'b00?: Result = a + (ALUControl[0] ? ~b : b) + ALUControl[0]; // ADDER: two's complement
-            //3'b010: Result = a & b;
-            //3'b011: Result = a | b;
-            //3'b100: Result = a << b; // LSL
-            //3'b101: Result = a >> b; // LSR 
-            //3'b000: Result = multiplier_result; // Assuming you want the lower 8 bits of the multiplier result
-            3'b000: Result = {16'b0, multiplier_result}; // Fill upper 16 bits with zeros
+            3'b00?: Result = a + (ALUControl[0] ? ~b : b) + ALUControl[0]; // ADDER: two's complement
+            3'b010: Result = a & b;
+            3'b011: Result = a | b;
+            3'b100: Result = a << b; // LSL
+            3'b101: Result = a >> b; // LSR 
+            3'b110: Result = {16'b0, multiplier_result}; // Assuming you want the lower 8 bits of the multiplier result
+            //3'b000: Result = {16'b0, multiplier_result}; // Fill upper 16 bits with zeros
             default: Result = 32'b0;
         endcase
     end

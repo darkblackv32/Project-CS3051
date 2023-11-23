@@ -46,8 +46,8 @@ module fmul (A, B, result);
                 mantisa = temp_mantisa[20:11];
                 if(temp_mantisa[10] == 1) begin
                     mantisa = mantisa + 1;
-                    E = E + 1;
                 end
+                E = E + 1;
             end
 
 
