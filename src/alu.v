@@ -23,6 +23,7 @@ module alu(input [31:0] a, b,
             3'b010: Result = a & b;
             3'b011: Result = a | b;
             3'b100: Result = {16'b0, multiplier};
+            default: Result = sum;
         endcase
     end
 

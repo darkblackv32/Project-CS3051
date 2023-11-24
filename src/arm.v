@@ -95,11 +95,13 @@ module arm (
 	wire [1:0] ImmSrc;
 	wire [2:0] ALUControl;
 	wire [1:0] ResultSrc;
+	wire isShift;
 	controller c(
 		.clk(clk),
 		.reset(reset),
 		.Instr(Instr[31:12]),
 		.ALUFlags(ALUFlags),
+		.isShift(isShift),
 		.PCWrite(PCWrite),
 		.MemWrite(MemWrite),
 		.RegWrite(RegWrite),
@@ -129,7 +131,8 @@ module arm (
 		.ALUSrcB(ALUSrcB),
 		.ResultSrc(ResultSrc),
 		.ImmSrc(ImmSrc),
-		.ALUControl(ALUControl)
+		.ALUControl(ALUControl),
+		.isShift(isShift)
 	);
 endmodule
 

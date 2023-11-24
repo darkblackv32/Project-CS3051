@@ -14,7 +14,7 @@ always @(*) begin
     case(sh)
         2'b00: shift = rm << shamt;
         2'b01: shift = rm >> shamt;
-        default: shift = rm;
+        default: shift = 0;
     endcase
 end
 

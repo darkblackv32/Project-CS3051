@@ -3,6 +3,7 @@ module controller (
 	reset,
 	Instr,
 	ALUFlags,
+	isShift,
 	PCWrite,
 	MemWrite,
 	RegWrite,
@@ -19,6 +20,7 @@ module controller (
 	input wire reset;
 	input wire [31:12] Instr;
 	input wire [3:0] ALUFlags;
+	output wire isShift;
 	output wire PCWrite;
 	output wire MemWrite;
 	output wire RegWrite;
@@ -41,6 +43,7 @@ module controller (
 		.Op(Instr[27:26]),
 		.Funct(Instr[25:20]),
 		.Rd(Instr[15:12]),
+		.isShift(isShift),
 		.FlagW(FlagW),
 		.PCS(PCS),
 		.NextPC(NextPC),

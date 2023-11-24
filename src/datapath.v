@@ -22,7 +22,8 @@ module datapath (
 	ALUSrcB,
 	ResultSrc,
 	ImmSrc,
-	ALUControl
+	ALUControl,
+	isShift
 );
 	input wire clk;
 	input wire reset;
@@ -41,6 +42,7 @@ module datapath (
 	input wire [1:0] ResultSrc;
 	input wire [1:0] ImmSrc;
 	input wire [2:0] ALUControl;
+	input wire isShift;
 	wire [31:0] PCNext;
 	wire [31:0] PC;
 	wire [31:0] ExtImm;
@@ -56,6 +58,7 @@ module datapath (
 	wire [31:0] ALUOut;
 	wire [3:0] RA1;
 	wire [3:0] RA2;
+	wire [31:0] value_A;
 
 	// Your datapath hardware goes below. Instantiate each of the 
 	// submodules that you need. Remember that you can reuse hardware
@@ -63,35 +66,122 @@ module datapath (
 	// applicable names such as pcreg (PC register), adrmux 
 	// (Address Mux), etc. so that your code is easier to understand.
 
+	flopenr #(32) pcreg (
+      .clk(clk),
+      .reset(reset),
+      .en(PCWrite),
+      .d(Result),
+      .q(PC)
+  );
+  	mux2 #(32) adrmux (
+      .d0(PC),
+      .d1(Result),
+      .s (AdrSrc),
+      .y (Adr)
+  );
+ 
+  	flopenr #(32) instrreg (
+      .clk(clk),
+      .reset(reset),
+      .en(IRWrite),
+      .d(ReadData),
+      .q(Instr)
+  );
+  	flopr #(32) readdatareg (
+      .clk(clk),
+      .reset(reset),
+      .d(ReadData),
+      .q(Data)
+  );
+  	mux2 #(4) ra1mux (
+      .d0(Instr[19:16]),
+      .d1(4'b1111),
+      .s (RegSrc[0]),
+      .y (RA1)
+  );
+  	mux2 #(4) ra2mux (
+      .d0(Instr[3:0]),
+      .d1(Instr[15:12]),
+      .s (RegSrc[1]),
+      .y (RA2)
+  );
+  	regfile rf (
+      .clk(clk),
+      .we3(RegWrite),
+      .ra1(RA1),
+      .ra2(RA2),
+      .wa3(Instr[15:12]),
+      .wd3(Result),
+      .r15(Result),
+      .rd1(RD1),
+      .rd2(RD2)
+  );
+  	extend ext (
+      .Instr (Instr[23:0]),
+      .ImmSrc(ImmSrc),
+      .ExtImm(ExtImm)
+  );
+  	flopr #(32) r1Reg (
+      .clk(clk),
+      .reset(reset),
+      .d(RD1),
+      .q(A)
+  );
+  	flopr #(32) r2Reg (
+      .clk(clk),
+      .reset(reset),
+      .d(RD2),
+      .q(WriteData)
+  );
 
-  //Registers
-  flopenr #(32) pcreg(clk, reset, PCWrite, PCNext, PC);
-  flopenr #(32) instrreg(clk, reset, IRWrite, ReadData, Instr);
-  flopr #(32)   datareg(clk, reset, ReadData, Data);
-  flopr #(32)   rd1reg(clk, reset, RD1, A);
-  flopr #(32)   rd2reg(clk, reset, RD2, WriteData);
-  flopr #(32)   alureg(clk, reset, ALUResult, ALUOut);
-  
-  //Multiplexers
-  mux2 #(32)    adrmux(PC, Result, AdrSrc, Adr);
-  mux2 #(4)     ra1mux(Instr[19:16], 4'b1111, RegSrc[0], RA1);
-  mux2 #(4)     ra2mux(Instr[3:0], Instr[15:12], RegSrc[1], RA2);  
-  mux3 #(32)    srcAmux(A, PC, ALUOut, ALUSrcA, SrcA);
-  mux3 #(32)    srcBmux(WriteData, ExtImm, 32'h0000_0004, ALUSrcB, SrcB);
-  mux3 #(32)    alumux(ALUOut, Data, ALUResult, ResultSrc, Result);
-  
-  //Register File
-  regfile  rf(clk, RegWrite, RA1, RA2, Instr[15:12], Result, Result, RD1, RD2); 
-  
-  //Extend
-  extend   ext(Instr[23:0], ImmSrc, ExtImm);
+	mux2 #(32) srcAtoZero(
+		.d0(A),
+		.d1(32'b0),
+		.s(isShift),
+		.y(value_A)
+  );
 
-  //Shifter
-  shifter shft(WriteData, Instr[11:7],Instr[6:5], toMuxB);
-  
-  //ALU
-  alu      alu(SrcA, SrcB, ALUControl, ALUResult, ALUFlags);
 
-  assign PCNext = Result;
+  	mux2 #(32) srcamux (
+      .d0(value_A),
+      .d1(PC),
+      .s (ALUSrcA[0]),
+      .y (SrcA)
+  );
+  	mux3 #(32) srcbmux (
+      .d0(toMuxB),
+      .d1(ExtImm),
+      .d2(4),
+      .s (ALUSrcB),
+      .y (SrcB)
+  );
+  	alu alu (
+      SrcA,
+      SrcB,
+      ALUControl,
+      ALUResult,
+      ALUFlags
+  );
+  	flopr #(32) aluresultreg (
+      .clk(clk),
+      .reset(reset),
+      .d(ALUResult),
+      .q(ALUOut)
+  );
+  	mux3 #(32) resmux (
+      .d0(ALUOut),
+      .d1(Data),
+      .d2(ALUResult),
+      .s (ResultSrc),
+      .y (Result)
+  );
+  
+	shifter shft (
+		.rm(WriteData),
+		.shamt(Instr[11:7]),
+		.sh(Instr[6:5]),
+		.shift(toMuxB)
+	);
+
 endmodule
 

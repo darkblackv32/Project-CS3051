@@ -4,6 +4,7 @@ module decode (
 	Op,
 	Funct,
 	Rd,
+	isShift,
 	FlagW,
 	PCS,
 	NextPC,
@@ -23,6 +24,7 @@ module decode (
 	input wire [1:0] Op;
 	input wire [5:0] Funct;
 	input wire [3:0] Rd;
+	output wire isShift;
 	output reg [1:0] FlagW;
 	output wire PCS;
 	output wire NextPC;
@@ -69,7 +71,7 @@ module decode (
         4'b0000: ALUControl = 3'b010; // AND
   	    4'b1100: ALUControl = 3'b011; // ORR
 		4'b1111: ALUControl = 3'b100; // MUL
-  	    default: ALUControl = 3'bx;  // unimplemented
+  	    default: ALUControl = 3'b000;  // unimplemented
       endcase
       // update flags if S bit is set 
 	  // (C & V only updated for arith instructions)
@@ -83,8 +85,8 @@ module decode (
 
 	// PC Logic
 
-  assign PCS = ((Rd == 4'b1111) & RegW) | Branch;
-
+  	assign PCS = ((Rd == 4'b1111) & RegW) | Branch;
+	assign isShift = (Op == 2'b00) & (Funct[4:1] == 4'b1101);
 
 	// Add code for the Instruction Decoder (Instr Decoder) below.
 	// Recall that the input to Instr Decoder is Op, and the outputs are
@@ -92,12 +94,12 @@ module decode (
 
 	// Instr Decoder
 	assign ImmSrc = Op;
-  always @(*) 
-    case(Op) 
-      2'b00: RegSrc = 2'b00; // DP instr
-      2'b01: RegSrc = 2'b10; // MEM instr
-      2'b10: RegSrc = 2'b01; // BR instr
-      default: RegSrc = 2'bx; // unimplemented
-    endcase
+	always @(*) 
+		case(Op) 
+		2'b00: RegSrc = 2'b00; // DP instr
+		2'b01: RegSrc = 2'b10; // MEM instr
+		2'b10: RegSrc = 2'b01; // BR instr
+		default: RegSrc = 2'bx; // unimplemented
+		endcase
 endmodule
 
