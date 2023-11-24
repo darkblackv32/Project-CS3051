@@ -18,7 +18,7 @@ module alu (
     fmul uut_mult (
         .A(a[15:0]),
         .B(b[15:0]),
-        .result(multiplier_result)
+        .result(multiplier_result[15:0])
     );
 
     // ALU and multiplier functionality

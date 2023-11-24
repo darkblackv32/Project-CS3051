@@ -16,7 +16,7 @@ module Shift(
     else begin
       case (shift)
         1'b0: shift_reg <= data_in_a << data_in_b; // lsl
-        1'b1: shift_reg <= data_in >> data_in_b; // lsr
+        1'b1: shift_reg <= data_in_b >> data_in_b; // lsr
         default: shift_reg <= shift_reg; // No operation
       endcase
     end

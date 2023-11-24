@@ -64,11 +64,10 @@ module decode (
 	always @(*)
 		if (ALUOp) begin // which Data-processing Instr?
 			case(Funct[4:1])
-				4'b0100: ALUControl = 3'b00?; // ADDER
+				4'b0100: ALUControl = 3'b000; // ADDER
+				4'b0100: ALUControl = 3'b001; // SUB
 				4'b0010: ALUControl = 3'b010; // AND
 				4'b0000: ALUControl = 3'b011; // ORR
-				4'b1100: ALUControl = 3'b100; // LSL
-				4'b1110: ALUControl = 3'b101; // LSR
 				4'b1011: ALUControl = 3'b110; // MUL
 				// MUL DOES NOT USES IMMEDIATES ONLY REGISTERS
 				// COND 00 X 1011 S Rn Rd 00000000 Rm
