@@ -76,8 +76,8 @@ module decode (
 			endcase
 			
 			//FMUL does NOT SET FLAGS
-			FlagW[1] = Funct[0] & (AlUControl != 3'b001); // update N & Z flags if S bit is set
-			FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001 | ALUControl == 3'b0); // update C & V flags if S bit is set
+			FlagW[1] = Funct[0] & (ALUControl != 3'b001); // update N & Z flags if S bit is set
+			FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001); // update C & V flags if S bit is set
 		end else begin
 			ALUControl = 3'b000; // add for non data-processing instructions
 			FlagW = 3'b000; // don't update Flags
