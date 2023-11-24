@@ -69,14 +69,18 @@ module decode (
 				4'b0000: ALUControl = 3'b011; // ORR
 				4'b1100: ALUControl = 3'b100; // LSL
 				4'b1110: ALUControl = 3'b101; // LSR
+				4'b1011: ALUControl = 3'b110; // MUL
+				// MUL DOES NOT USES IMMEDIATES ONLY REGISTERS
+				// COND 00 X 1011 S Rn Rd 00000000 Rm
 				default: ALUControl = 3'bx; // unimplemented
 			endcase
 			
-			FlagW[1] = Funct[0]; // update N & Z flags if S bit is set
-			FlagW[0] = Funct[0] & (ALUControl == 2'b00 | ALUControl == 2'b01);
+			//FMUL does NOT SET FLAGS
+			FlagW[1] = Funct[0] & (AlUControl != 3'b001); // update N & Z flags if S bit is set
+			FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001 | ALUControl == 3'b0); // update C & V flags if S bit is set
 		end else begin
-			ALUControl = 2'b00; // add for non data-processing instructions
-			FlagW = 2'b00; // don't update Flags
+			ALUControl = 3'b000; // add for non data-processing instructions
+			FlagW = 3'b000; // don't update Flags
 		end
 
 	// PC Logic
