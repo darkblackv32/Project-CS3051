@@ -11,3 +11,4 @@ module mux2 (
 	output wire [WIDTH - 1:0] y;
 	assign y = (s ? d1 : d0);
 endmodule
+

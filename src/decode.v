@@ -34,7 +34,7 @@ module decode (
 	output wire [1:0] ALUSrcA;
 	output wire [1:0] ALUSrcB;
 	output wire [1:0] ImmSrc;
-	output wire [1:0] RegSrc;
+	output reg [1:0] RegSrc;
 	output reg [2:0] ALUControl;
 	wire Branch;
 	wire ALUOp;
@@ -61,29 +61,30 @@ module decode (
 	// Add code for the ALU Decoder and PC Logic.
 	// Remember, you may reuse code from previous labs.
 	// ALU Decoder
-	always @(*)
-		if (ALUOp) begin // which Data-processing Instr?
-			case(Funct[4:1])
-				4'b0100: ALUControl = 3'b000; // ADDER
-				4'b0100: ALUControl = 3'b001; // SUB
-				4'b0010: ALUControl = 3'b010; // AND
-				4'b0000: ALUControl = 3'b011; // ORR
-				4'b1011: ALUControl = 3'b110; // MUL
-				// MUL DOES NOT USES IMMEDIATES ONLY REGISTERS
-				// COND 00 X 1011 S Rn Rd 00000000 Rm
-				default: ALUControl = 3'bx; // unimplemented
-			endcase
-			
-			//FMUL does NOT SET FLAGS
-			FlagW[1] = Funct[0] & (ALUControl != 3'b001); // update N & Z flags if S bit is set
-			FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001); // update C & V flags if S bit is set
-		end else begin
-			ALUControl = 3'b000; // add for non data-processing instructions
-			FlagW = 3'b000; // don't update Flags
-		end
+   always @(*) 
+    if (ALUOp) begin                 // which DP Instr?
+      case(Funct[4:1]) 
+  	    4'b0100: ALUControl = 3'b000; // ADD
+  	    4'b0010: ALUControl = 3'b001; // SUB
+        4'b0000: ALUControl = 3'b010; // AND
+  	    4'b1100: ALUControl = 3'b011; // ORR
+		4'b1111: ALUControl = 3'b100; // MUL
+  	    default: ALUControl = 3'bx;  // unimplemented
+      endcase
+      // update flags if S bit is set 
+	  // (C & V only updated for arith instructions)
+      FlagW[1] = Funct[0]; // FlagW[1] = S-bit
+	  // FlagW[0] = S-bit & (ADD | SUB)
+      FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001); 
+    end else begin
+      ALUControl = 2'b00; // add for non-DP instructions
+      FlagW      = 2'b00; // don't update Flags
+    end
 
 	// PC Logic
- 	assign PCS = ((Rd == 4'b1111) & RegW) | Branch;  //PONER LO DEL LABO PASADO
+
+  assign PCS = ((Rd == 4'b1111) & RegW) | Branch;
+
 
 	// Add code for the Instruction Decoder (Instr Decoder) below.
 	// Recall that the input to Instr Decoder is Op, and the outputs are
@@ -91,6 +92,12 @@ module decode (
 
 	// Instr Decoder
 	assign ImmSrc = Op;
-	assign RegSrc[0] = (Op == 2'b10); // read PC on Branch
-	assign RegSrc[1] = (Op == 2'b01); // read Rd on STR 
+  always @(*) 
+    case(Op) 
+      2'b00: RegSrc = 2'b00; // DP instr
+      2'b01: RegSrc = 2'b10; // MEM instr
+      2'b10: RegSrc = 2'b01; // BR instr
+      default: RegSrc = 2'bx; // unimplemented
+    endcase
 endmodule
+

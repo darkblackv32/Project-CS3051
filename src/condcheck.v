@@ -8,9 +8,13 @@ module condcheck (
 	output reg CondEx;
 
 	// ADD CODE HERE
-	wire neg, zero, carry, overflow, ge; 
+  wire neg;
+	wire zero;
+	wire carry;
+	wire overflow;
+	wire ge;
 	assign {neg, zero, carry, overflow} = Flags;
-    assign ge = (neg == overflow); 
+	assign ge = (neg == overflow);
 	always @(*)
 		case (Cond)
 			4'b0000: CondEx = zero;
@@ -27,7 +31,8 @@ module condcheck (
 			4'b1011: CondEx = ~ge;
 			4'b1100: CondEx = ~zero & ge;
 			4'b1101: CondEx = ~(~zero & ge);
-			4'b1110: CondEx = 1'b1;
-			default: CondEx = 1'bx;
+			4'b1110: CondEx = 1'b1;  // always
+			default: CondEx = 1'bx;  // undefined
 		endcase
 endmodule
+

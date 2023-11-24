@@ -2,16 +2,18 @@ module testbench;
 	reg clk;
 	reg reset;
 	wire [31:0] WriteData;
-	wire [31:0] Adr;
-	wire MemWrite;
+	wire [31:0] DataAdr;
+	wire  MemWrite;
 	top dut(
 		.clk(clk),
 		.reset(reset),
 		.WriteData(WriteData),
-		.Adr(Adr),
+		.Adr(DataAdr),
 		.MemWrite(MemWrite)
 	);
 	initial begin
+	  $dumpfile("multi_tb.vcd");
+	  $dumpvars(0, testbench);
 		reset <= 1;
 		#(22)
 			;
@@ -25,19 +27,19 @@ module testbench;
 		#(5)
 			;
 	end
-	always @(negedge clk)
+	always @(negedge clk) begin
 		if (MemWrite)
-			if ((Adr === 100) & (WriteData === 7)) begin
+			if (DataAdr === 100 & WriteData === 7) begin
 				$display("Simulation succeeded");
 				$stop;
-			end
-			else if (Adr !== 96) begin
+				end
+			else if (DataAdr !== 96) begin
 				$display("Simulation failed");
+				$display("DataAdr: %b, WriteData: %b, MemWrite: %b", DataAdr, WriteData, MemWrite);
 				$stop;
 			end
-			
-	initial begin
-		$dumpfile("sim.vcd");
-		$dumpvars;
+
 	end
 endmodule
+
+

@@ -19,7 +19,6 @@ module regfile (
 	output wire [31:0] rd1;
 	output wire [31:0] rd2;
 	reg [31:0] rf [14:0];
-	
 	always @(posedge clk)
 		if (we3)
 			rf[wa3] <= wd3;
