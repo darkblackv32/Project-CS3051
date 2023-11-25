@@ -8,5 +8,15 @@ Tasks:  <br>
 
 [FMULL, LSL and LSR in Basys3](https://www.youtube.com/watch?v=CuBdzae33R0) 
 
-
-
+-Compilador custom .py
+   - Requires Python 3.6 or higher
+   - Only supports the following instructions:
+      - ADD
+      - SUB
+      - AND
+      - ORR
+      - FMUL
+      - LSL
+      - LSR
+      - LDR
+      - STR

@@ -1,6 +1,6 @@
 #ASM ARM "ENCODER"
 CMMDS = ["ADD","SUB","ORR","AND","FMUL","B"]
-
+pc = 0
 #CONSTANTS
 op = {
     "ADD"  : "00",
@@ -66,11 +66,15 @@ def parser(line):
     line = line[:-1]
     #replace all , for espaces
     line = line.replace(","," ")
+    
     #replace all [ for espaces]
     line = line.replace("[","")
     line = line.replace("]","")
     #remove all ;
-    line = line.split(";")[0]
+    try:
+        line = line.split(";")[0]
+    except:
+        raise Exception("Comment not closed")
     #parse line
     return line.split(" ")
 
@@ -114,7 +118,7 @@ def decodeFunc(OPCODE):
 def main():
     fileSrc = open("src.s","r")
     fileLab = open("src.s","r")
-    fileOut = open("mainfile.dat","w")
+    fileOut = open("memfile.dat","w")
 
     pc = 0
     instr = None
@@ -142,8 +146,11 @@ def main():
         pc += 4
 
     pc = 0
+    level = 0
 
     for index,line in enumerate(fileSrc):
+        level += 1
+        print("Line:",level)
         #FORMAT INPUT
         line = parser(line)
 
@@ -177,7 +184,7 @@ def main():
                 #print("SH:",setFlags)
                 instr = encondeDP(cond,funct[func],"0",setFlags,"0000",Rd,src2)
             else:
-                imm = (func != "FMUL") if getImm(line[3]) else ""
+                imm = getImm(line[3]) if (func != "FMUL")  else ""
                 Rn = getReg(line[2])
                 Rd = getReg(line[1])
                 #build src2
@@ -219,7 +226,7 @@ def main():
             fileOut.write( "\n")
 
         fileOut.write("\n")
-        #print(func  + " => " + instr)
+        print(func  + " => " + instr)
 
     fileSrc.close()
     fileOut.close()
@@ -231,3 +238,4 @@ if __name__ == "__main__":
     print("Reading ./src.s ...")
     main()
     print("DONE! Written to memfile.dat")
+
